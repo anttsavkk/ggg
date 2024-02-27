@@ -1,0 +1,35 @@
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
+def encrypt_text(key, text):
+    cipher = AES.new(key, AES.MODE_EAX)
+    nonce = cipher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(text.encode('utf-8'))
+    return nonce, ciphertext, tag
+
+def decrypt_text(key, nonce, ciphertext, tag):
+    cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+    plaintext = cipher.decrypt(ciphertext)
+    try:
+        cipher.verify(tag)
+        return plaintext.decode('utf-8')
+    except ValueError:
+        return "Decryption error: Invalid tag"
+
+# Generate a random key
+key = get_random_bytes(16)
+
+# Text to encrypt
+text_to_encrypt = "This is a secret message!"
+
+# Encrypt the text
+nonce, ciphertext, tag = encrypt_text(key, text_to_encrypt)
+
+# Display the encrypted text
+print("Encrypted text:", ciphertext)
+
+# Decrypt the text
+decrypted_text = decrypt_text(key, nonce, ciphertext, tag)
+
+# Display the decrypted text
+print("Decrypted text:", decrypted_text)
